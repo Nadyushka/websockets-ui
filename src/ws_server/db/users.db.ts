@@ -24,9 +24,10 @@ export class UsersDb {
     }
 
     createUser (userData: ClientLoginCreateType): LoginCreateType {
+        const userIndex =  new Date().getTime().toString()
         const newUser = new UserModel({
             ...userData,
-            index: new Date().getTime().toString(),
+            index: userIndex,
         })
 
         this.users.push(newUser)

@@ -1,7 +1,8 @@
 import {RawData, Server, type WebSocket} from 'ws';
 import {MessageTypeEnum} from "./enums/MessageTypeEnum";
-import {ClientMessageType, LoginCreateType} from "./types/ClientMessageType";
+import {ClientMessageType, CreateRoomType, LoginCreateType} from "./types/ClientMessageType";
 import {createLoginClient} from "./controllers/createLoginClient";
+import {createRoom} from "./controllers/createRoom";
 
 
 export const startWsServer = () => {
@@ -38,18 +39,18 @@ export const incomingClientMessageHandler = (rawData: RawData, ws: WebSocket) =>
         return
     }
 
-    const clientMessageWithParcedData = {
+    const clientMessageWithParsedData = {
         ...clientMessage,
         data: JSON.parse(clientMessage.data.toString())
     }
 
     switch (clientMessage.type) {
         case MessageTypeEnum.Registration: {
-            createLoginClient(clientMessageWithParcedData as ClientMessageType<LoginCreateType>, ws)
+            createLoginClient(clientMessageWithParsedData as ClientMessageType<LoginCreateType>, ws)
             break
         }
         case MessageTypeEnum.CreateRoom: {
-            createRoom(clientMessage, ws)
+            createRoom(clientMessage as ClientMessageType<CreateRoomType>, ws)
             break
         }
         case MessageTypeEnum.AddUserToRoom: {
@@ -74,22 +75,18 @@ export const incomingClientMessageHandler = (rawData: RawData, ws: WebSocket) =>
     }
 }
 
-const createRoom = (clientMessage: ClientMessageType, ws: WebSocket) => {
-    console.log('createRoom',clientMessage, ws)
-}
-
 const addClientToRoom = (clientMessage: ClientMessageType, ws: WebSocket) => {
-    console.log('addClientToRoom',clientMessage, ws)
+    console.log('addClientToRoom',clientMessage, ws.send)
 }
 
 const addShips = (clientMessage: ClientMessageType, ws: WebSocket) => {
-    console.log('addShips',clientMessage, ws)
+    console.log('addShips',clientMessage, ws.send)
 }
 
 const attack = (clientMessage: ClientMessageType, ws: WebSocket) => {
-    console.log('attack',clientMessage, ws)
+    console.log('attack',clientMessage, ws.send)
 }
 
 const randomAttack = (clientMessage: ClientMessageType, ws: WebSocket) => {
-    console.log('randomAttack',clientMessage, ws)
+    console.log('randomAttack',clientMessage, ws.send)
 }
