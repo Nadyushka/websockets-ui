@@ -16,32 +16,50 @@ export class RoomsDb {
         return this.rooms
     }
 
+    getRoom(indexRoom: string | number):RoomModel  {
+        return this.rooms.find(room => room.roomId === indexRoom)!
+    }
+
     /**
      *  Create new room
      */
-    createRoom(): RoomModel[] {
+    createRoom(): string {
         const roomId = new Date().getTime().toString()
-        const newRoom = new RoomModel({
-            roomId
-        })
+        const newRoom = {
+            roomId,
+            roomUsers: []
+        }
 
         this.rooms.push(newRoom)
 
-        return this.rooms
+        return roomId
     }
 
     /**
      * Send only rooms with 1 player
      */
     updateRooms(): RoomModel[] {
-        return [...this.rooms.filter(room => room.roomUsers.length = 1 )]
+        return [...this.rooms.filter(room => room.roomUsers.length === 1 )]
     }
 
     /**
-     * Add another user to room with 1 player and remove room from available
+     * Add another to room
      */
-    addUserToRoom(indexRoom: number) {
-        this.rooms = this.rooms.filter(room => room.roomId !== indexRoom )
-        return this.rooms
+    addUserToRoom(userName: string, index: string, indexRoom: string | number) {
+        const userInRoom = {
+            name: userName,
+            index
+        }
+
+        this.rooms = this.rooms.map(room => {
+            if (room.roomId == indexRoom) {
+                return {
+                    roomId: indexRoom,
+                    roomUsers: [...room.roomUsers, userInRoom]
+                }
+            } else {
+                return room
+            }
+        } )
     }
 }

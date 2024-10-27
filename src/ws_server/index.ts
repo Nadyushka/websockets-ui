@@ -1,9 +1,17 @@
 import {RawData, Server, type WebSocket} from 'ws';
 import {MessageTypeEnum} from "./enums/MessageTypeEnum";
-import {ClientMessageType, CreateRoomType, LoginCreateType} from "./types/ClientMessageType";
+import type {
+    AddShipsType,
+    AddUserToRoomType,
+    AttackType,
+    ClientMessageType,
+    LoginCreateType
+} from "./types/ClientMessageType";
 import {createLoginClient} from "./controllers/createLoginClient";
 import {createRoom} from "./controllers/createRoom";
-
+import {addClientToRoom} from "./controllers/addClientToRoom";
+import {addShips} from "./controllers/addShips";
+import {attack} from "./controllers/attack";
 
 export const startWsServer = () => {
     const PORT = process.env.PORT || 3000
@@ -16,7 +24,9 @@ export const startWsServer = () => {
     console.log(`WebSocket server is listening on port! ${PORT}`);
 }
 
-export const onConnection = (ws: WebSocket) => {
+export const onConnection = (ws: WebSocket ) => {
+    const clientIndex = new Date().getTime().toString();
+
     ws.on('error', error => {
         console.error(error);
     });
@@ -26,47 +36,44 @@ export const onConnection = (ws: WebSocket) => {
     });
 
     ws.on('message', (rawData: RawData) => {
-        incomingClientMessageHandler(rawData, ws)
+        incomingClientMessageHandler(rawData, ws, clientIndex)
     })
 
 }
 
-export const incomingClientMessageHandler = (rawData: RawData, ws: WebSocket) => {
-    const clientMessage: ClientMessageType = JSON.parse(rawData.toString())
+export const incomingClientMessageHandler = (rawData: RawData, ws: WebSocket, clientIndex: string) => {
+    const clientMessage = JSON.parse(rawData.toString())
 
-    if (!clientMessage || !clientMessage.data) {
-        console.error('No data was provided in message')
-        return
-    }
-
-    const clientMessageWithParsedData = {
+    const clientMessageWithParsedData: ClientMessageType  = {
         ...clientMessage,
-        data: JSON.parse(clientMessage.data.toString())
+        data: clientMessage.data ?
+            JSON.parse(clientMessage.data.toString()) :
+            ''
     }
 
     switch (clientMessage.type) {
         case MessageTypeEnum.Registration: {
-            createLoginClient(clientMessageWithParsedData as ClientMessageType<LoginCreateType>, ws)
+            createLoginClient(clientMessageWithParsedData as ClientMessageType<LoginCreateType>, ws, clientIndex)
             break
         }
         case MessageTypeEnum.CreateRoom: {
-            createRoom(clientMessage as ClientMessageType<CreateRoomType>, ws)
+            createRoom(clientIndex)
             break
         }
         case MessageTypeEnum.AddUserToRoom: {
-            addClientToRoom(clientMessage, ws)
+            addClientToRoom(clientMessageWithParsedData as ClientMessageType<AddUserToRoomType>, clientIndex)
             break
         }
         case MessageTypeEnum.AddShips: {
-            addShips(clientMessage, ws)
+            addShips(clientMessageWithParsedData as ClientMessageType<AddShipsType>)
             break
         }
         case MessageTypeEnum.Attack: {
-            attack(clientMessage, ws)
+            attack(clientMessageWithParsedData as ClientMessageType<AttackType>)
             break
         }
         case MessageTypeEnum.RandomAttack: {
-            randomAttack(clientMessage, ws)
+            randomAttack(clientMessageWithParsedData, ws)
             break
         }
         default: {
@@ -75,17 +82,6 @@ export const incomingClientMessageHandler = (rawData: RawData, ws: WebSocket) =>
     }
 }
 
-const addClientToRoom = (clientMessage: ClientMessageType, ws: WebSocket) => {
-    console.log('addClientToRoom',clientMessage, ws.send)
-}
-
-const addShips = (clientMessage: ClientMessageType, ws: WebSocket) => {
-    console.log('addShips',clientMessage, ws.send)
-}
-
-const attack = (clientMessage: ClientMessageType, ws: WebSocket) => {
-    console.log('attack',clientMessage, ws.send)
-}
 
 const randomAttack = (clientMessage: ClientMessageType, ws: WebSocket) => {
     console.log('randomAttack',clientMessage, ws.send)

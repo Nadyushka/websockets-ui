@@ -1,4 +1,4 @@
-import {ConnectionsDb} from "../db/wsConnections.db";
+import {ConnectionsDb} from "../db/connections.db";
 import {prepareJsonResponse} from "../utils/prepareJsonResponse";
 import {MessageTypeEnum} from "../enums/MessageTypeEnum";
 import {RoomsDb} from "../db/rooms.db";

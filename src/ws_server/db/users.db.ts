@@ -18,16 +18,18 @@ export class UsersDb {
         return this.users;
     }
 
+    getUser(index: string):UserModel {
+        return this.users.find(user => user.index === index)!
+    }
+
     ifUserExistByNameCheck (name: string):boolean {
-        console.log(this.users.findIndex(user => user.name === name))
         return this.users.findIndex(user => user.name === name) > 0
     }
 
     createUser (userData: ClientLoginCreateType): LoginCreateType {
-        const userIndex =  new Date().getTime().toString()
         const newUser = new UserModel({
             ...userData,
-            index: userIndex,
+            index: userData.clientIndex,
         })
 
         this.users.push(newUser)

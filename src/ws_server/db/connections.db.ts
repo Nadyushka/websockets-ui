@@ -1,4 +1,5 @@
 import {ConnectionType} from "../types/CommonTypes";
+import {WebSocket} from "ws";
 
 export class ConnectionsDb {
     public static instance: ConnectionsDb;
@@ -14,6 +15,10 @@ export class ConnectionsDb {
 
     getConnections():ConnectionType[] {
         return this.connections
+    }
+
+    getConnection(clientIndex: string | number): WebSocket {
+        return this.connections.find(connection => connection.userIndex === clientIndex)!.ws
     }
 
     addConnection(info: ConnectionType) {

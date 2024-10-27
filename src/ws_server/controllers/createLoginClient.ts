@@ -4,14 +4,14 @@ import {MessageTypeEnum} from "../enums/MessageTypeEnum";
 import {UsersDb} from "../db/users.db";
 import {type LoginCreateType} from "../types/ServerMessageType";
 import {prepareJsonResponse} from "../utils/prepareJsonResponse";
-import {ConnectionsDb} from "../db/wsConnections.db";
+import {ConnectionsDb} from "../db/connections.db";
 import {updateWinners} from "./updateWinners";
 import {updateRooms} from "./updateRooms";
 
 const usersDb = UsersDb.getInstance()
 const connectionDb = ConnectionsDb.getInstance()
 
-export const createLoginClient = (clientMessage: ClientMessageType<ClientLoginCreateType>, ws: WebSocket) => {
+export const createLoginClient = (clientMessage: ClientMessageType<ClientLoginCreateType>, ws: WebSocket, clientIndex: string) => {
     const { name, password} = clientMessage.data;
     if (!name || !password) {
         ws.send(prepareJsonResponse(
@@ -31,15 +31,15 @@ export const createLoginClient = (clientMessage: ClientMessageType<ClientLoginCr
 
     let result: LoginCreateType = {
         error: true,
-        index: '',
+        index: clientIndex,
         name,
         errorText: 'Some error happened'
     }
 
     if (isUserExist) {
-        result =  usersDb.loginUser({ name, password})
+        result =  usersDb.loginUser({ name, password, clientIndex})
     } else {
-        result = usersDb.createUser({ name, password})
+        result = usersDb.createUser({ name, password, clientIndex})
     }
 
     ws.send(

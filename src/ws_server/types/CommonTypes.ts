@@ -18,4 +18,14 @@ export type ShipInfoType = {
     type: ShipSizeEnum,
 }
 
-export type ConnectionType = { userIndex: string | number ,ws: WebSocket }
+export type ConnectionType = {
+    userIndex: string | number ,
+    ws: WebSocket
+}
+
+export type PlayerType = {
+    index: number | string,
+    playerId: number | string,
+    ships: Array<ShipInfoType>,
+    shipsStatus: Array<ShipInfoType>
+}

@@ -12,6 +12,7 @@ type DefaultTypes =   LoginCreateType |
 export type LoginCreateType = {
     name: string
     password: string
+    clientIndex: string
 }
 
 export type CreateRoomType = ''
