@@ -3,6 +3,7 @@ import {prepareJsonResponse} from "../utils/prepareJsonResponse";
 import {MessageTypeEnum} from "../enums/MessageTypeEnum";
 import {turn} from "./turn";
 import {getClientConnection} from "../utils/getClientConnection";
+import {BOT_INDEX} from "../constants";
 
 const games = GamesDb.getInstance()
 
@@ -11,8 +12,11 @@ export const startGame = (idGame: number | string) => {
 
     const [playerOne, playerTwo] = game.players
 
-    const playerOneConnection = getClientConnection({ playerIndex: playerOne!.playerId })
-    const playerTwoConnection = getClientConnection({ playerIndex: playerTwo!.playerId })
+    const playerOneIsNotABot = playerOne!.index != BOT_INDEX
+    const playerTwoIsNotABot = playerTwo!.index != BOT_INDEX
+
+    const playerOneConnection = playerOneIsNotABot ? getClientConnection({ playerIndex: playerOne!.playerId }) : ''
+    const playerTwoConnection = playerTwoIsNotABot ? getClientConnection({ playerIndex: playerTwo!.playerId }) : ''
 
     const messageOne = prepareJsonResponse(
         MessageTypeEnum.StartGame,
@@ -30,8 +34,8 @@ export const startGame = (idGame: number | string) => {
         })
     )
 
-    playerOneConnection.send(messageOne)
-    playerTwoConnection.send(messageTwo)
+    playerOneConnection && playerOneConnection.send(messageOne)
+    playerTwoConnection && playerTwoConnection.send(messageTwo)
 
-    turn(playerOne!.playerId, idGame)
+    turn(playerTwo!.playerId, idGame)
 }

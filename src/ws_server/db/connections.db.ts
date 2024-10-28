@@ -25,7 +25,7 @@ export class ConnectionsDb {
         this.connections.push(info)
     }
 
-    removeCollection(userIndex: string) {
+    deleteConnection(userIndex: string) {
         const connectionInx = this.connections.findIndex(connection => connection.userIndex === userIndex)
         this.connections.splice(connectionInx, 1)
     }

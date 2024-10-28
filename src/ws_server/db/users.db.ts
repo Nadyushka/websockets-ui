@@ -1,6 +1,7 @@
 import {UserModel} from "../models/UserModel";
 import {type LoginCreateType} from "../types/ServerMessageType";
 import { type LoginCreateType as ClientLoginCreateType} from "../types/ClientMessageType";
+import {BOT_INDEX} from "../constants";
 
 export class UsersDb {
     public static instance: UsersDb;
@@ -12,7 +13,12 @@ export class UsersDb {
         return UsersDb.instance;
     }
 
-    private users:UserModel[] = []
+    private users:UserModel[] = [{
+        name: 'bot',
+        password: 'botbotbot',
+        index: BOT_INDEX
+     }
+    ]
 
     getUsers ():UserModel[] {
         return this.users;

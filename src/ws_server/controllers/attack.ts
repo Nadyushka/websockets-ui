@@ -5,38 +5,67 @@ import {prepareJsonResponse} from "../utils/prepareJsonResponse";
 import {MessageTypeEnum} from "../enums/MessageTypeEnum";
 import {turn} from "./turn";
 import {finish} from "./finish";
+import {BOT_INDEX} from "../constants";
+import {randomAttack} from "./randomAttack";
 
 const gamesDb = GamesDb.getInstance()
 
 export const attack = (clientMessage: ClientMessageType<AttackType>) => {
-    const messageData = clientMessage.data
-    const currentGame = gamesDb.getGameByPlayerId(messageData.indexPlayer)
-    const [playerOne, playerTwo] = currentGame.players
+    try {
+        const messageData = clientMessage.data
+        const currentGame = gamesDb.getGameByPlayerId(messageData.indexPlayer)
 
-    const playerOneConnection = getClientConnection({ playerIndex:playerOne!.playerId  })
-    const playerTwoConnection = getClientConnection({ playerIndex:playerTwo!.playerId  })
+        const [playerOne, playerTwo] = currentGame.players
 
-    const result = gamesDb.checkAttackResults(messageData)
+        const playerOneIsNotABot = playerOne!.index != BOT_INDEX
+        const playerTwoIsNotABot = playerTwo!.index != BOT_INDEX
 
-    const message = prepareJsonResponse(
-        MessageTypeEnum.Attack,
-        JSON.stringify({
-            position:
-                {
-                    x: clientMessage.data.x,
-                    y: clientMessage.data.y,
-                },
-            currentPlayer: clientMessage.data.indexPlayer,
-            status: result.attackResult,
-        })
-    )
+        const isGameWithBot = !playerOneIsNotABot || !playerTwoIsNotABot
 
-    playerOneConnection.send(message)
-    playerTwoConnection.send(message)
+        const playerOneConnection = playerOneIsNotABot ? getClientConnection({playerIndex: playerOne!.playerId}) : ''
+        const playerTwoConnection = playerTwoIsNotABot ? getClientConnection({playerIndex: playerTwo!.playerId}) : ''
 
-    turn(result.nextAttackPlayerId, currentGame.idGame)
+        const result = gamesDb.checkAttackResults(messageData)
 
-    if (result.isGameFinish) {
-        finish(messageData.indexPlayer, messageData.gameId)
+        const message = prepareJsonResponse(
+            MessageTypeEnum.Attack,
+            JSON.stringify({
+                position:
+                    {
+                        x: clientMessage.data.x,
+                        y: clientMessage.data.y,
+                    },
+                currentPlayer: clientMessage.data.indexPlayer,
+                status: result.attackResult,
+            })
+        )
+
+        playerOneConnection && playerOneConnection.send(message)
+        playerTwoConnection && playerTwoConnection.send(message)
+
+        turn(result.nextAttackPlayerId, currentGame.idGame)
+
+        const isNextAttackByBot = isGameWithBot && result.nextAttackPlayerId != BOT_INDEX
+
+        if (isGameWithBot && isNextAttackByBot && !result.isGameFinish) {
+            setTimeout(() => {
+                randomAttack({
+                    id: 0,
+                    data: {
+                        gameId: messageData.gameId,
+                        indexPlayer: BOT_INDEX
+                    },
+                    type: MessageTypeEnum.Attack
+                })
+            }, 500)
+
+            return
+        }
+
+        if (result.isGameFinish) {
+            finish(messageData.indexPlayer, messageData.gameId)
+        }
+    } catch (e) {
+        console.error('Attack error: ',e )
     }
 }

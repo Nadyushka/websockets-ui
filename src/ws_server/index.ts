@@ -13,6 +13,13 @@ import {addClientToRoom} from "./controllers/addClientToRoom";
 import {addShips} from "./controllers/addShips";
 import {attack} from "./controllers/attack";
 import {randomAttack} from "./controllers/randomAttack";
+import {singleMode} from "./controllers/singleMode";
+import {GamesDb} from "./db/games.db";
+import {finish} from "./controllers/finish";
+import {ConnectionsDb} from "./db/connections.db";
+
+const gamesDB = GamesDb.getInstance()
+const connectionsDb = ConnectionsDb.getInstance()
 
 export const startWsServer = () => {
     const PORT = process.env.PORT || 3000
@@ -33,7 +40,20 @@ export const onConnection = (ws: WebSocket ) => {
     });
 
     ws.on('close', () => {
-        console.log('User was disconnected');
+        try {
+            const gameWithDisconnectedPlayer = gamesDB.getGameByPlayerId(clientIndex)
+            const playerThatLeftConnected = gameWithDisconnectedPlayer.players.find(player => player.index != clientIndex)
+
+            if ( playerThatLeftConnected ) {
+                finish(playerThatLeftConnected.index, gameWithDisconnectedPlayer.idGame)
+                connectionsDb.deleteConnection(clientIndex)
+            }
+
+            console.log('User was disconnected');
+        } catch (e) {
+            console.error('onConnection error: ', e)
+        }
+
     });
 
     ws.on('message', (rawData: RawData) => {
@@ -75,6 +95,10 @@ export const incomingClientMessageHandler = (rawData: RawData, ws: WebSocket, cl
         }
         case MessageTypeEnum.RandomAttack: {
             randomAttack(clientMessageWithParsedData as ClientMessageType<RandomAttackType>)
+            break
+        }
+        case MessageTypeEnum.SinglePlay:{
+            singleMode(clientIndex)
             break
         }
         default: {

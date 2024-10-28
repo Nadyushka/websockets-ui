@@ -10,5 +10,6 @@ export enum MessageTypeEnum {
     Attack = "attack",
     RandomAttack = "randomAttack",
     Turn = "turn",
-    Finish = "finish"
+    Finish = "finish",
+    SinglePlay = "single_play"
 }
