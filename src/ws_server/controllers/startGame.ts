@@ -18,16 +18,15 @@ export const startGame = (idGame: number | string) => {
         MessageTypeEnum.StartGame,
        JSON.stringify( {
             ships: playerOne!.ships,
-            currentPlayerIndex: playerOneConnection
+            currentPlayerIndex: playerOne!.playerId
         })
         )
-
 
     const messageTwo = prepareJsonResponse(
         MessageTypeEnum.StartGame,
         JSON.stringify( {
             ships: playerTwo!.ships,
-            currentPlayerIndex: playerTwoConnection
+            currentPlayerIndex: playerTwo!.playerId
         })
     )
 

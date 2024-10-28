@@ -28,4 +28,7 @@ export type PlayerType = {
     playerId: number | string,
     ships: Array<ShipInfoType>,
     shipsStatus: Array<ShipInfoType>
+    attackStory?: string[]
 }
+
+

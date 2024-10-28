@@ -35,6 +35,13 @@ export class RoomsDb {
         return roomId
     }
 
+    deleteRoom(clientOneIndex: number | string, clientTwoIndex: number | string) {
+        this.rooms = this.rooms.filter(room => {
+            const roomUsersIndex = room.roomUsers.map(user => user.index)
+            return !(roomUsersIndex.includes(clientOneIndex) && roomUsersIndex.includes(clientTwoIndex))
+        })
+    }
+
     /**
      * Send only rooms with 1 player
      */
@@ -45,7 +52,7 @@ export class RoomsDb {
     /**
      * Add another to room
      */
-    addUserToRoom(userName: string, index: string, indexRoom: string | number) {
+    addUserToRoom(userName: string, index: string | number, indexRoom: string | number) {
         const userInRoom = {
             name: userName,
             index

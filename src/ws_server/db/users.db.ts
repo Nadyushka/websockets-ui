@@ -18,7 +18,7 @@ export class UsersDb {
         return this.users;
     }
 
-    getUser(index: string):UserModel {
+    getUser(index: string | number):UserModel {
         return this.users.find(user => user.index === index)!
     }
 

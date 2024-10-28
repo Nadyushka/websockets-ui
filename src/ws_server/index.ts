@@ -5,13 +5,14 @@ import type {
     AddUserToRoomType,
     AttackType,
     ClientMessageType,
-    LoginCreateType
+    LoginCreateType, RandomAttackType
 } from "./types/ClientMessageType";
 import {createLoginClient} from "./controllers/createLoginClient";
 import {createRoom} from "./controllers/createRoom";
 import {addClientToRoom} from "./controllers/addClientToRoom";
 import {addShips} from "./controllers/addShips";
 import {attack} from "./controllers/attack";
+import {randomAttack} from "./controllers/randomAttack";
 
 export const startWsServer = () => {
     const PORT = process.env.PORT || 3000
@@ -73,16 +74,11 @@ export const incomingClientMessageHandler = (rawData: RawData, ws: WebSocket, cl
             break
         }
         case MessageTypeEnum.RandomAttack: {
-            randomAttack(clientMessageWithParsedData, ws)
+            randomAttack(clientMessageWithParsedData as ClientMessageType<RandomAttackType>)
             break
         }
         default: {
             console.log('Unknown message type')
         }
     }
-}
-
-
-const randomAttack = (clientMessage: ClientMessageType, ws: WebSocket) => {
-    console.log('randomAttack',clientMessage, ws.send)
 }

@@ -4,6 +4,7 @@ import {getClientConnection} from "../utils/getClientConnection";
 import {prepareJsonResponse} from "../utils/prepareJsonResponse";
 import {MessageTypeEnum} from "../enums/MessageTypeEnum";
 import {turn} from "./turn";
+import {finish} from "./finish";
 
 const gamesDb = GamesDb.getInstance()
 
@@ -26,12 +27,16 @@ export const attack = (clientMessage: ClientMessageType<AttackType>) => {
                     y: clientMessage.data.y,
                 },
             currentPlayer: clientMessage.data.indexPlayer,
-            status: result,
+            status: result.attackResult,
         })
     )
 
     playerOneConnection.send(message)
     playerTwoConnection.send(message)
 
-    turn(clientMessage.data.indexPlayer, currentGame.idGame)
+    turn(result.nextAttackPlayerId, currentGame.idGame)
+
+    if (result.isGameFinish) {
+        finish(messageData.indexPlayer, messageData.gameId)
+    }
 }
